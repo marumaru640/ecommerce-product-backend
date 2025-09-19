@@ -1,4 +1,12 @@
 spring:
- config:
-  activate:
-   on-profile: local
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    url: jdbc:mysql://localhost:3306/ecommerce?useSSL=false&serverTimezone=UTC
+    username: app
+    password: apppass
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
