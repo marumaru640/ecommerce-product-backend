@@ -20,6 +20,7 @@ import lombok.Setter;
 
 @Entity
 @Getter
+@Setter
 @Table(name = "members", uniqueConstraints = @UniqueConstraint(columnNames = "email"))
 public class Member {
 	
@@ -57,4 +58,8 @@ public class Member {
 		this.password = password;
 		this.name = name;
 	}
+
+
+	
+	
 }
