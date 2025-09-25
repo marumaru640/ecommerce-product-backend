@@ -3,8 +3,8 @@ package com.marumaru640.ecommerce_product_backend.member;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.marumaru640.ecommerce_product_backend.excepton.EmailAlreadyExistsException;
-import com.marumaru640.ecommerce_product_backend.excepton.NotFoundException;
+import com.marumaru640.ecommerce_product_backend.exception.EmailAlreadyExistsException;
+import com.marumaru640.ecommerce_product_backend.exception.NotFoundException;
 import com.marumaru640.ecommerce_product_backend.mapper.MemberMapper;
 import com.marumaru640.ecommerce_product_backend.member.dto.MemberCreateRequest;
 import com.marumaru640.ecommerce_product_backend.member.dto.MemberResponse;
@@ -25,7 +25,7 @@ public class MemberService {
 		this.passwordEncoder = passwordEncoder;
 	}
 	
-	@Transactional
+	@Transactional(readOnly = true)
 	public MemberResponse get(Long id) {
 		Member m = repo.findById(id).orElseThrow();
 		return mapper.toResponse(m);
@@ -47,7 +47,8 @@ public class MemberService {
 	
 	@Transactional
 	public MemberResponse update(Long id, MemberUpdateRequest req) {
-		Member entity = repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Member not found: " + id));
+		Member entity = repo.findById(id)
+				.orElseThrow(() -> new NotFoundException("Member not found: " + id));
 		
 		mapper.updateEntityFromDto(req, entity);
 		

@@ -1,4 +1,4 @@
-package com.marumaru640.ecommerce_product_backend.excepton;
+package com.marumaru640.ecommerce_product_backend.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
