@@ -14,12 +14,12 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
+import lombok.Data;
 import lombok.Setter;
 
 
 @Entity
-@Getter
+@Data
 @Table(name = "members", uniqueConstraints = @UniqueConstraint(columnNames = "email"))
 public class Member {
 	
@@ -57,4 +57,8 @@ public class Member {
 		this.password = password;
 		this.name = name;
 	}
+
+
+	
+	
 }
