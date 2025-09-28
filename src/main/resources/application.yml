@@ -4,3 +4,8 @@ server:
 spring:
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:local}
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    issuer: ecommerce-product
+    expires-minutes: 60
