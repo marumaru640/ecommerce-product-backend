@@ -35,7 +35,6 @@ public class Member {
 	@JsonIgnore
 	@Setter @NotBlank
 	@Column(nullable = false, length = 255)
-//	@Size(min = 4, message = "パスワードは４文字以上")
 	private String password;
 	
 	@Setter @NotBlank
@@ -58,8 +57,4 @@ public class Member {
 		this.password = password;
 		this.name = name;
 	}
-
-
-	
-	
 }
