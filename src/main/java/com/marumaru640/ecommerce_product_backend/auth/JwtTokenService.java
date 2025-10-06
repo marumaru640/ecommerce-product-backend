@@ -28,7 +28,7 @@ public class JwtTokenService {
 	public JwtTokenService(
 			@Value("${app.jwt.secret}") String secret,
 			@Value("${app.jwt.issuer:ecommerce-product}") String issuer,
-			@Value("${app.jwt.expires-minutes:60}") long expiresMinutes
+			@Value("${app.jwt.access-expires:60}") long expiresMinutes
 			) {
 		if(secret == null || secret.isBlank()) {
 			throw new IllegalAccessError("JWT secret is not configured (app.jwt.secret / JWT_SECRET).");
