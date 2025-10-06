@@ -8,4 +8,5 @@ app:
   jwt:
     secret: ${JWT_SECRET}
     issuer: ecommerce-product
-    expires-minutes: 60
+    access-expires: 60
+    refresh-expires: 7

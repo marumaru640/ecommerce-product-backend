@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.marumaru640.ecommerce_product_backend.member.dto.LoginRequest;
 import com.marumaru640.ecommerce_product_backend.member.dto.LoginResponse;
+import com.marumaru640.ecommerce_product_backend.member.dto.RefreshTokenRequest;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -21,6 +22,12 @@ public class AuthController {
 	@PostMapping("/login")
 	public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest req) {
 		var res = authService.login(req.email(), req.password());
+		return ResponseEntity.ok(res);
+	}
+	
+	@PostMapping("/refresh")
+	public ResponseEntity<LoginResponse> refreshToken(@RequestBody RefreshTokenRequest req) {
+		var res = authService.refreshToken(req.refreshToken());
 		return ResponseEntity.ok(res);
 	}
 }
