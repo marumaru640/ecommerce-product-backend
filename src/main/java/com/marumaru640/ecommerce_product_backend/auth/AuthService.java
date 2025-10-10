@@ -1,5 +1,7 @@
 package com.marumaru640.ecommerce_product_backend.auth;
 
+import java.time.Instant;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -13,10 +15,12 @@ import com.marumaru640.ecommerce_product_backend.member.MemberRepository;
 import com.marumaru640.ecommerce_product_backend.member.RefreshToken;
 import com.marumaru640.ecommerce_product_backend.member.dto.LoginResponse;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 @Service
 public class AuthService {
 	private final MemberRepository memberRepo;
-	private final PasswordEncoder passwordEncoder;
 	private final JwtTokenService jwtTokenService;
 	private final RefreshTokenService refreshTokenService;
 	private final AuthenticationManager authenticationManager;
@@ -30,15 +34,14 @@ public class AuthService {
 			AuthenticationManager authenticationManager
 			) {
 		this.memberRepo = memberRepo;
-		this.passwordEncoder = passwordEncoder;
 		this.jwtTokenService = jwtTokenService;
 		this.refreshTokenService = refreshTokenService;
 		this.authenticationManager = authenticationManager;
 	}
 	
 	@Transactional
-	public LoginResponse login(String email, String rawPassword) {
-		Authentication auth = authenticationManager.authenticate(
+	public LoginResponse login(String email, String rawPassword, HttpServletResponse res) {
+		authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(email, rawPassword)
 				);
 		
@@ -48,27 +51,50 @@ public class AuthService {
 		
 		RefreshToken refreshToken = refreshTokenService.createRefreshToken(member.getId());
 		
+		CookieUtil.addRefreshTokenCookie(res, refreshToken.getToken(), 
+				(int) (refreshToken.getExpriyDate().getEpochSecond() - Instant.now().getEpochSecond()));
+		
 		return new LoginResponse(
 				accessToken,
-				refreshToken.getToken(),
+				null,
 				"Bearer", 
 				jwtTokenService.expiresInSeconds()
 				);
 	}
 	
 	@Transactional
-	public LoginResponse refreshToken(String refreshTokenString) {
-		RefreshToken refreshToken = refreshTokenService.verifyRefreshToken(refreshTokenString);
+	public LoginResponse refreshToken(HttpServletRequest req, HttpServletResponse res) {
+		String refreshTokenString = CookieUtil.extractRefreshToken(req);
+		if(refreshTokenString == null || refreshTokenString.isBlank()) {
+			throw new UnauthorizedException("No refresh token cookie");
+		}
 		
-		Member member = refreshToken.getMember();
+		RefreshToken valid = refreshTokenService.verifyUsable(refreshTokenString);
+		
+		Member member = valid.getMember();
 		
 		String newAccessToken = jwtTokenService.generateToken(member);
 		
+		RefreshToken rotated = refreshTokenService.rotate(valid);
+		
+		CookieUtil.addRefreshTokenCookie(res, rotated.getToken(), 
+				(int) (rotated.getExpriyDate().getEpochSecond() - Instant.now().getEpochSecond()));
+		
 		return new LoginResponse(
 				newAccessToken,
-				refreshTokenString,
+				null,
 				"Bearer",
 				jwtTokenService.expiresInSeconds()
 				);
+	}
+	
+	@Transactional
+	public void logout(HttpServletRequest req, HttpServletResponse res) {
+		String refreshTokenString = CookieUtil.extractRefreshToken(req);
+		if(refreshTokenString != null) {
+			refreshTokenService.revoke(refreshTokenString);
+		}
+		
+		CookieUtil.clearRefreshTokenCookie(res);
 	}
 }
