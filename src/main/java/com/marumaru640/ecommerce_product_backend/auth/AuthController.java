@@ -33,4 +33,10 @@ public class AuthController {
 		var resDto = authService.refreshToken(req, res);
 		return ResponseEntity.ok(resDto);
 	}
+	
+	@PostMapping("/logout")
+	public ResponseEntity<Void> logout(HttpServletRequest req, HttpServletResponse res) {
+		authService.logout(req, res);
+		return ResponseEntity.noContent().build();
+	}
 }

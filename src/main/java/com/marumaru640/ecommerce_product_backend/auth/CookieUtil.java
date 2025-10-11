@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class CookieUtil {
-	public static final String RT_COOKIE = "Refresh Cookie";
+	public static final String RT_COOKIE = "RefreshToken";
 	
 	public static void addRefreshTokenCookie(HttpServletResponse res, String token, int maxAgeSeconds) {
 		Cookie cookie = new Cookie(RT_COOKIE, token);
