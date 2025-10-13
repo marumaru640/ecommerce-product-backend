@@ -2,6 +2,7 @@ package com.marumaru640.ecommerce_product_backend.auth;
 
 import java.time.Instant;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -24,6 +25,12 @@ public class AuthService {
 	private final JwtTokenService jwtTokenService;
 	private final RefreshTokenService refreshTokenService;
 	private final AuthenticationManager authenticationManager;
+	
+	@Value("${app.cookie.secure}") 
+	private boolean cookieSecure;
+	
+	@Value("${app.cookie.same-site}") 
+	private String cookieSameSite;
 	
 	
 	public AuthService (
@@ -52,11 +59,13 @@ public class AuthService {
 		RefreshToken refreshToken = refreshTokenService.createRefreshToken(member.getId());
 		
 		CookieUtil.addRefreshTokenCookie(res, refreshToken.getToken(), 
-				(int) (refreshToken.getExpriyDate().getEpochSecond() - Instant.now().getEpochSecond()));
+				(int) (refreshToken.getExpriyDate().getEpochSecond() - Instant.now().getEpochSecond()), 
+				cookieSecure,
+				cookieSameSite
+				);
 		
 		return new LoginResponse(
 				accessToken,
-				null,
 				"Bearer", 
 				jwtTokenService.expiresInSeconds()
 				);
@@ -78,11 +87,13 @@ public class AuthService {
 		RefreshToken rotated = refreshTokenService.rotate(valid);
 		
 		CookieUtil.addRefreshTokenCookie(res, rotated.getToken(), 
-				(int) (rotated.getExpriyDate().getEpochSecond() - Instant.now().getEpochSecond()));
+				(int) (rotated.getExpriyDate().getEpochSecond() - Instant.now().getEpochSecond()),
+				cookieSecure,
+				cookieSameSite
+				);
 		
 		return new LoginResponse(
 				newAccessToken,
-				null,
 				"Bearer",
 				jwtTokenService.expiresInSeconds()
 				);
@@ -95,6 +106,6 @@ public class AuthService {
 			refreshTokenService.revoke(refreshTokenString);
 		}
 		
-		CookieUtil.clearRefreshTokenCookie(res);
+		CookieUtil.clearRefreshTokenCookie(res,cookieSecure,cookieSameSite);
 	}
 }
