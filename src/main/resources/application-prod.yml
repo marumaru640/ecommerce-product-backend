@@ -2,3 +2,7 @@ spring:
  config:
   activate:
    on-profile: prod
+app:
+  cookie:
+    secure: false
+    same-site: Lax

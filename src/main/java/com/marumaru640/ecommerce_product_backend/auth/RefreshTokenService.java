@@ -40,19 +40,44 @@ public class RefreshTokenService {
 		refreshToken.setMember(member);
 		refreshToken.setToken(UUID.randomUUID().toString());
 		refreshToken.setExpriyDate(Instant.now().plus(refreshExpiresDays, ChronoUnit.DAYS));
+		refreshToken.setRevoked(false);
 		
 		return refreshRepo.save(refreshToken);
 	}
 	
-	public RefreshToken verifyRefreshToken(String token) {
-		RefreshToken refreshToken = refreshRepo.findByToken(token)
+	@Transactional
+	public RefreshToken verifyUsable(String token) {
+		RefreshToken refreshToken = refreshRepo.findByTokenAndRevokedFalse(token)
 				.orElseThrow(() -> new RuntimeException("Refresh token not found in DB"));
 		
 		if (refreshToken.getExpriyDate().isBefore(Instant.now())) {
-			refreshRepo.delete(refreshToken);
+			refreshToken.setRevoked(true);
+			refreshRepo.save(refreshToken);
 			throw new RuntimeException("Refresh token was expired. Please make a new sigin request.");
 		}
 		
 		return refreshToken;
+	}
+	
+	@Transactional
+	public RefreshToken rotate(RefreshToken old) {
+		old.setRevoked(true);
+		refreshRepo.save(old);
+		
+		RefreshToken newRefreshToken = new RefreshToken();
+		newRefreshToken.setMember(old.getMember());
+		newRefreshToken.setToken(UUID.randomUUID().toString());
+		newRefreshToken.setExpriyDate(Instant.now().plus(refreshExpiresDays, ChronoUnit.DAYS));
+		newRefreshToken.setRevoked(false);
+		
+		return refreshRepo.save(newRefreshToken);
+	}
+	
+	@Transactional
+	public void revoke(String token) {
+		refreshRepo.findByToken(token).ifPresent(rt -> {
+			rt.setRevoked(true);
+			refreshRepo.save(rt);
+		});
 	}
 }
