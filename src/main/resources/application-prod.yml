@@ -3,6 +3,8 @@ spring:
   activate:
    on-profile: prod
 app:
+  cors:
+    allowed-origins:"https://ecommerce-product-azure.vercel.app"
   cookie:
     secure: false
     same-site: Lax
