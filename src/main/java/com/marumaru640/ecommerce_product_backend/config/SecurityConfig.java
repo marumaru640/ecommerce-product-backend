@@ -32,7 +32,13 @@ public class SecurityConfig {
 			.formLogin(form -> form.disable())
 			.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(authz -> authz
-					.requestMatchers("/api/auth/login", "/api/health", "/api/auth/refresh", "/api/auth/logout").permitAll()
+					.requestMatchers(
+							"/api/members",
+							"/api/auth/login", 
+							"/api/health", 
+							"/api/auth/refresh", 
+							"/api/auth/logout"
+							).permitAll()
 					.anyRequest().authenticated()
 			);
 		return http.build();
